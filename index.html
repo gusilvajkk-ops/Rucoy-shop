@@ -1,1 +1,109 @@
+/* MIGRAÇÃO PARA MVP PROFISSIONAL – Rucoy Hub Market */
+
+/* STACK:
+- Frontend: React + Vite
+- Backend: Firebase (Auth + Firestore)
+- Pagamentos: Mercado Pago (anúncios em destaque)
+*/
+
+// 1️⃣ CONFIG FIREBASE
+// firebase.js
+import { initializeApp } from "firebase/app"
+import { getAuth } from "firebase/auth"
+import { getFirestore } from "firebase/firestore"
+
+const firebaseConfig = {
+  apiKey: "SUA_API_KEY",
+  authDomain: "SEU_DOMINIO",
+  projectId: "SEU_PROJECT_ID",
+  storageBucket: "SEU_BUCKET",
+  messagingSenderId: "SEU_ID",
+  appId: "SEU_APP_ID"
+}
+
+const app = initializeApp(firebaseConfig)
+export const auth = getAuth(app)
+export const db = getFirestore(app)
+
+// 2️⃣ MODELO DO BANCO (Firestore)
+/*
+accounts {
+  nick: string
+  classe: string
+  level: number
+  price: number
+  whatsapp: string
+  approved: boolean
+  featured: boolean
+  createdAt: timestamp
+}
+users {
+  uid: string
+  email: string
+  role: 'admin' | 'seller'
+  reputation: number
+}
+*/
+
+// 3️⃣ COMPONENTE CARD DE CONTA
+export function AccountCard({ account }) {
+  return (
+    <div className="card">
+      <h3>{account.nick}</h3>
+      <span>{account.classe}</span>
+      <p>Level {account.level}</p>
+      <p>R$ {account.price}</p>
+      <a href={`https://wa.me/${account.whatsapp}`} target="_blank">WhatsApp</a>
+    </div>
+  )
+}
+
+// 4️⃣ ADMIN – APROVAR / DESTACAR
+import { updateDoc, doc } from "firebase/firestore"
+
+async function approveAccount(id) {
+  await updateDoc(doc(db, "accounts", id), { approved: true })
+}
+
+async function featureAccount(id) {
+  await updateDoc(doc(db, "accounts", id), { featured: true })
+}
+
+// 5️⃣ SISTEMA DE DENÚNCIA
+/*
+reports {
+  accountId
+  reason
+  createdAt
+}
+*/
+
+// 6️⃣ MONETIZAÇÃO
+// Usuário paga para destacar anúncio
+// Integração Mercado Pago → webhook libera featured=true
+
+// 7️⃣ SEGURANÇA
+// Firestore Rules
+/*
+rules_version = '2';
+service cloud.firestore {
+ match /databases/{database}/documents {
+  match /accounts/{id} {
+   allow read: if true;
+   allow write: if request.auth != null;
+  }
+  match /users/{id} {
+   allow read, write: if request.auth.uid == id;
+  }
+ }
+}
+*/
+
+// 8️⃣ PRÓXIMOS MÓDULOS
+// - Sistema de avaliação ⭐⭐⭐⭐⭐
+// - Histórico de anúncios
+// - Logs antifraude
+// - SEO para Google
+
+/* ESTE É O ESQUELETO COMPLETO PARA ESCALAR */
 
